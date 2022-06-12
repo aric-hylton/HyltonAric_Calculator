@@ -10,17 +10,7 @@ public:
 
 public:
 
-	wxButton* m_btn1 = nullptr;
-	wxButton* m_btn2 = nullptr;
-	wxButton* m_btn3 = nullptr;
-
-	wxButton* m_btn4 = nullptr;
-	wxButton* m_btn5 = nullptr;
-	wxButton* m_btn6 = nullptr;
-
-	wxButton* m_btn7 = nullptr;
-	wxButton* m_btn8 = nullptr;
-	wxButton* m_btn9 = nullptr;
+	std::vector<wxButton*> m_numButtons;
 
 	wxButton* m_btn_division = nullptr;
 	wxButton* m_btn_multiply = nullptr;
@@ -38,9 +28,28 @@ public:
 
 	wxButton* m_btn0 = nullptr;
 	
-	wxListBox* m_list1 = nullptr;
+	wxTextCtrl* m_TextCtrl = nullptr;
 
-	void OnButtonClicked(wxCommandEvent& evt);
+	std::string m_preDecimal;
+
+	void updateDisplay();
+
+	void onNumButton(wxCommandEvent&, int NUM);
+	void OnNumClicked(wxCommandEvent& evt);
+	void OnOperationClicked(wxCommandEvent& evt);
+	void Clear(wxCommandEvent&);
+
+	enum operation_type {
+		OP_ADD,
+		OP_SUB,
+		OP_MUL,
+		OP_DIV
+	};
+
+	static double performOperation(
+		double left,
+		double right,
+		int op);
  
 	wxDECLARE_EVENT_TABLE();
 };
