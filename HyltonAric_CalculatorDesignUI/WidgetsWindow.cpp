@@ -39,7 +39,7 @@ wxBEGIN_EVENT_TABLE(WidgetsWindow, wxFrame)
 	EVT_BUTTON(ID_7_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_8_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_9_BUTTON, OnNumClicked)
-	EVT_BUTTON(ID_DECI_BUTTON, OnNumClicked)
+	EVT_BUTTON(ID_DECI_BUTTON, OnDeciClicked)
 	EVT_BUTTON(ID_SIGN_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_ADD_BUTTON, OnOperationClicked)
 	EVT_BUTTON(ID_SUB_BUTTON, OnOperationClicked)
@@ -49,7 +49,7 @@ wxBEGIN_EVENT_TABLE(WidgetsWindow, wxFrame)
 	EVT_BUTTON(ID_HEX_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_BINARY_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_MOD_BUTTON, OnNumClicked)
-	EVT_BUTTON(ID_EQUAL_BUTTON, OnNumClicked)
+	EVT_BUTTON(ID_EQUAL_BUTTON, OnEqualClicked)
 wxEND_EVENT_TABLE()
 
 
@@ -111,37 +111,91 @@ void WidgetsWindow::OnNumClicked(wxCommandEvent& evt) {
 	evt.Skip();
 };
 
-void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
+void WidgetsWindow::OnDeciClicked(wxCommandEvent&) {
+	if (opExists) {
+		m_postOpNum += ".";
+	}
+	else {
+		m_preOpNum += ".";
+	}
+	updateDisplay();
+};
 
-	onNumButton(evt, evt.GetId());
+void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
+	opExists = true;
+	int OP = evt.GetId();
+	m_op = OP - OP_OFFSET;
+	switch (OP) {
+	case ID_ADD_BUTTON: {
+			m_preOpNum += "+";
+			break;
+		}
+		case ID_SUB_BUTTON: {
+			m_preOpNum += "-";
+			break;
+		}
+		case ID_MUL_BUTTON:
+		{
+			m_preOpNum += "*";
+			break;
+		}
+		case ID_DIV_BUTTON: {
+			m_preOpNum += "/";
+			break;
+		}
+	}
+	updateDisplay();
 	evt.Skip();
+};
+
+void WidgetsWindow::OnEqualClicked(wxCommandEvent& evt) {
+	double result = 0;
+	if (m_op >= 0) {
+		result = performOperation(m_total, m_cur, m_op);
+	}
+	m_TextCtrl->SetValue(std::to_string(result));
+	m_postOpNum.assign("");
+
+	m_preOpNum.assign(m_TextCtrl->GetValue());
+	m_total = result;
+
+	opExists = false;
 };
 
 void WidgetsWindow::updateDisplay()
 {
 	std::string numStr("");
-
-	numStr += m_preDecimal;
-
+	numStr.append(m_preOpNum);
+	numStr.append(m_postOpNum);
+	
 	m_TextCtrl->SetValue(numStr);
 }
 
 void WidgetsWindow::onNumButton(wxCommandEvent&, int NUM)
 {
-	m_preDecimal += std::to_string(NUM);
+	if (opExists) {
+		m_postOpNum += std::to_string(NUM);
+		m_cur = std::stod(m_postOpNum);
+	}
+	else {
+		m_preOpNum += std::to_string(NUM);
+		m_total = std::stod(m_preOpNum);
+	}
 	updateDisplay();
 }
 
 void WidgetsWindow::Clear(wxCommandEvent&)
 {
-	m_preDecimal = "";
+	opExists = false;
+	m_total = 0;
+	m_cur = 0;
+	m_preDecimal.assign("");
+	m_preOpNum.assign("");
+	m_postOpNum.assign("");
 	m_TextCtrl->SetValue("");
 }
 
-double WidgetsWindow::performOperation(
-	double const left,
-	double const right,
-	int const op)
+double WidgetsWindow::performOperation(double const left, double const right, int const op)
 {
 	double result;
 
@@ -168,7 +222,7 @@ double WidgetsWindow::performOperation(
 		break;
 	}
 	default: {
-		// TODO: handle this in a meaningful way for the user.
+		
 		throw std::runtime_error("Unknown OP: " + std::to_string(op));
 	}
 	}

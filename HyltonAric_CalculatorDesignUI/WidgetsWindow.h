@@ -27,16 +27,24 @@ public:
 	wxButton* m_btn_decimal = nullptr;
 
 	wxButton* m_btn0 = nullptr;
-	
 	wxTextCtrl* m_TextCtrl = nullptr;
-
 	std::string m_preDecimal;
+	std::string m_postDecimal;
+	std::string m_preOpNum;
+	std::string m_postOpNum;
+
+	double m_total;
+	double m_cur;
+	int m_op;
+	bool opExists = false;
 
 	void updateDisplay();
 
 	void onNumButton(wxCommandEvent&, int NUM);
 	void OnNumClicked(wxCommandEvent& evt);
 	void OnOperationClicked(wxCommandEvent& evt);
+	void OnEqualClicked(wxCommandEvent& evt);
+	void OnDeciClicked(wxCommandEvent&);
 	void Clear(wxCommandEvent&);
 
 	enum operation_type {
