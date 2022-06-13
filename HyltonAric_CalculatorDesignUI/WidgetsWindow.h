@@ -28,8 +28,6 @@ public:
 
 	wxButton* m_btn0 = nullptr;
 	wxTextCtrl* m_TextCtrl = nullptr;
-	std::string m_preDecimal;
-	std::string m_postDecimal;
 	std::string m_preOpNum;
 	std::string m_postOpNum;
 
@@ -37,21 +35,26 @@ public:
 	double m_cur;
 	int m_op;
 	bool opExists = false;
+	bool hex = false;
 
 	void updateDisplay();
-
 	void onNumButton(wxCommandEvent&, int NUM);
 	void OnNumClicked(wxCommandEvent& evt);
 	void OnOperationClicked(wxCommandEvent& evt);
 	void OnEqualClicked(wxCommandEvent& evt);
 	void OnDeciClicked(wxCommandEvent&);
+	void OnSignClicked(wxCommandEvent&);
+	void OnHexClicked(wxCommandEvent&);
+	void OnBinClicked(wxCommandEvent&);
+	void OnModClicked(wxCommandEvent&);
 	void Clear(wxCommandEvent&);
 
 	enum operation_type {
 		OP_ADD,
 		OP_SUB,
 		OP_MUL,
-		OP_DIV
+		OP_DIV,
+		OP_MOD
 	};
 
 	static double performOperation(

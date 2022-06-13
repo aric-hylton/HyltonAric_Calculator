@@ -1,4 +1,8 @@
 #include "WidgetsWindow.h"
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <bitset>
 
 const int OP_OFFSET = 1024;
 
@@ -20,9 +24,9 @@ enum event_ids {
 	ID_SUB_BUTTON = OP_OFFSET + 1,
 	ID_MUL_BUTTON = OP_OFFSET + 2,
 	ID_DIV_BUTTON = OP_OFFSET + 3,
+	ID_MOD_BUTTON = OP_OFFSET + 4,
 	ID_HEX_BUTTON,
 	ID_BINARY_BUTTON,
-	ID_MOD_BUTTON,
 	ID_CLS_BUTTON,
 	ID_EQUAL_BUTTON
 };
@@ -40,15 +44,15 @@ wxBEGIN_EVENT_TABLE(WidgetsWindow, wxFrame)
 	EVT_BUTTON(ID_8_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_9_BUTTON, OnNumClicked)
 	EVT_BUTTON(ID_DECI_BUTTON, OnDeciClicked)
-	EVT_BUTTON(ID_SIGN_BUTTON, OnNumClicked)
+	EVT_BUTTON(ID_SIGN_BUTTON, OnSignClicked)
 	EVT_BUTTON(ID_ADD_BUTTON, OnOperationClicked)
 	EVT_BUTTON(ID_SUB_BUTTON, OnOperationClicked)
 	EVT_BUTTON(ID_MUL_BUTTON, OnOperationClicked)
 	EVT_BUTTON(ID_DIV_BUTTON, OnOperationClicked)
+	EVT_BUTTON(ID_MOD_BUTTON, OnOperationClicked)
 	EVT_BUTTON(ID_CLS_BUTTON, Clear)
-	EVT_BUTTON(ID_HEX_BUTTON, OnNumClicked)
-	EVT_BUTTON(ID_BINARY_BUTTON, OnNumClicked)
-	EVT_BUTTON(ID_MOD_BUTTON, OnNumClicked)
+	EVT_BUTTON(ID_HEX_BUTTON, OnHexClicked)
+	EVT_BUTTON(ID_BINARY_BUTTON, OnBinClicked)
 	EVT_BUTTON(ID_EQUAL_BUTTON, OnEqualClicked)
 wxEND_EVENT_TABLE()
 
@@ -111,6 +115,30 @@ void WidgetsWindow::OnNumClicked(wxCommandEvent& evt) {
 	evt.Skip();
 };
 
+void WidgetsWindow::OnSignClicked(wxCommandEvent&) {
+	if (opExists) {
+		if (m_postOpNum.find("-") != std::string::npos) {
+			m_postOpNum.replace(0, 1, "");
+		}
+		else {
+			m_postOpNum.insert(0, "-");
+		}
+	}
+	else {
+		if (m_preOpNum.find("-") != std::string::npos) {
+			m_preOpNum.replace(0, 1, "");
+		}
+		else {
+			m_preOpNum.insert(0, "-");
+		}
+
+		if (m_preOpNum.length() != 1) {
+			m_total = std::stod(m_preOpNum);
+		}
+	}
+	updateDisplay();
+};
+
 void WidgetsWindow::OnDeciClicked(wxCommandEvent&) {
 	if (opExists) {
 		m_postOpNum += ".";
@@ -121,12 +149,47 @@ void WidgetsWindow::OnDeciClicked(wxCommandEvent&) {
 	updateDisplay();
 };
 
+void WidgetsWindow::OnBinClicked(wxCommandEvent&) {
+	if (!opExists) {
+		int y = round(m_total);
+		std::string binary = std::bitset<8>(m_total).to_string();
+		m_TextCtrl->SetValue(binary);
+
+		m_preOpNum.assign("");
+	}
+};
+
+void WidgetsWindow::OnHexClicked(wxCommandEvent&) {
+
+	std::string hexString;
+	if (!opExists ) {
+		if (!hex) {
+			std::ostringstream ss;
+			ss << "0x" << std::hexfloat << m_total;
+			hexString = ss.str();
+			m_TextCtrl->SetValue(hexString);
+
+			hex = true;
+		}
+		else {
+			std::stringstream ss;
+			ss << std::hex << hexString;
+			ss >> m_total;
+			m_TextCtrl->SetValue(std::to_string(m_total));
+
+			hex = false;
+		}
+		m_preOpNum.assign("");
+	}
+};
+
 void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
-	opExists = true;
-	int OP = evt.GetId();
-	m_op = OP - OP_OFFSET;
-	switch (OP) {
-	case ID_ADD_BUTTON: {
+	if (!opExists) {
+		opExists = true;
+		int OP = evt.GetId();
+		m_op = OP - OP_OFFSET;
+		switch (OP) {
+		case ID_ADD_BUTTON: {
 			m_preOpNum += "+";
 			break;
 		}
@@ -143,8 +206,14 @@ void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
 			m_preOpNum += "/";
 			break;
 		}
+		case ID_MOD_BUTTON: {
+			m_preOpNum += "%";
+			break;
+		}
+		}
+		updateDisplay();
 	}
-	updateDisplay();
+	
 	evt.Skip();
 };
 
@@ -154,8 +223,8 @@ void WidgetsWindow::OnEqualClicked(wxCommandEvent& evt) {
 		result = performOperation(m_total, m_cur, m_op);
 	}
 	m_TextCtrl->SetValue(std::to_string(result));
-	m_postOpNum.assign("");
 
+	m_postOpNum.assign("");
 	m_preOpNum.assign(m_TextCtrl->GetValue());
 	m_total = result;
 
@@ -184,12 +253,12 @@ void WidgetsWindow::onNumButton(wxCommandEvent&, int NUM)
 	updateDisplay();
 }
 
+
 void WidgetsWindow::Clear(wxCommandEvent&)
 {
 	opExists = false;
 	m_total = 0;
 	m_cur = 0;
-	m_preDecimal.assign("");
 	m_preOpNum.assign("");
 	m_postOpNum.assign("");
 	m_TextCtrl->SetValue("");
@@ -217,13 +286,13 @@ double WidgetsWindow::performOperation(double const left, double const right, in
 			result = left / right;
 		}
 		else {
-			throw std::runtime_error("Cannot divide by zero.");
+			result = 0;
 		}
 		break;
 	}
-	default: {
-		
-		throw std::runtime_error("Unknown OP: " + std::to_string(op));
+	case OP_MOD: {
+		result = (int)left % (int)right;
+		break;
 	}
 	}
 
