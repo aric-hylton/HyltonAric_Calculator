@@ -1,4 +1,5 @@
 #include "WidgetsWindow.h"
+#include "ButtonFactory.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -62,6 +63,8 @@ wxEND_EVENT_TABLE()
 
 WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(400, 200), wxSize(500, 550)) {
 
+	ButtonFactory factory;
+
 	wxFont font(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false);
 	
 	SetFont(font);
@@ -87,19 +90,21 @@ WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(
 	m_btn0 = new wxButton(this, 0, "0", wxPoint(120, 410), wxSize(100, 60));
 
 	// /, *, +, -, =
-	m_btn_division = new wxButton(this, ID_DIV_BUTTON, "/", wxPoint(340, 130), wxSize(100, 60));
-	m_btn_multiply = new wxButton(this, ID_MUL_BUTTON, "*", wxPoint(340, 200), wxSize(100, 60));
-	m_btn_add = new wxButton(this, ID_ADD_BUTTON, "+", wxPoint(340, 270), wxSize(100, 60));
-	m_btn_subtract = new wxButton(this, ID_SUB_BUTTON, "-", wxPoint(340, 340), wxSize(100, 60));
-	m_btn_equals = new wxButton(this, ID_EQUAL_BUTTON, "=", wxPoint(340, 410), wxSize(100, 60));
+	m_btn_add = factory.CreateAddButton(this);
+	m_btn_division = factory.CreateDivButton(this);
+	m_btn_multiply = factory.CreateMulButton(this);
+	m_btn_subtract = factory.CreateSubButton(this);
+	m_btn_equals = factory.CreateEqualsButton(this);
+	
 	// clear, hex, binary, mod
-	m_btn_mod = new wxButton(this, ID_CLS_BUTTON, "c", wxPoint(10, 130), wxSize(75, 60));
-	m_btn_hex = new wxButton(this, ID_HEX_BUTTON, "hex", wxPoint(92, 130), wxSize(75, 60));
-	m_btn_bin = new wxButton(this, ID_BINARY_BUTTON, "bin", wxPoint(174, 130), wxSize(75, 60));
-	m_btn_clear = new wxButton(this, ID_MOD_BUTTON, "mod", wxPoint(255, 130), wxSize(75, 60));
+	m_btn_hex = factory.CreateHexButton(this);
+	m_btn_mod = factory.CreateModButton(this);
+	m_btn_bin = factory.CreateBinButton(this);
+	m_btn_cls = factory.CreateCLSButton(this);
+
 	// negative, decimal
-	m_btn_negative = new wxButton(this, ID_SIGN_BUTTON, "+/-", wxPoint(10, 410), wxSize(100, 60));
-	m_btn_decimal = new wxButton(this, ID_DECI_BUTTON, ".", wxPoint(230, 410), wxSize(100, 60));
+	m_btn_negative = factory.CreateSignButton(this);
+	m_btn_decimal = factory.CreateDecButton(this);
 
 	// inputbox
 	m_TextCtrl = new wxTextCtrl(this, wxID_ANY, "", wxPoint(10, 10), wxSize(463, 100), wxTE_RIGHT);

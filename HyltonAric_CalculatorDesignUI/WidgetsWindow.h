@@ -21,7 +21,7 @@ public:
 	wxButton* m_btn_mod = nullptr;
 	wxButton* m_btn_hex = nullptr;
 	wxButton* m_btn_bin = nullptr;
-	wxButton* m_btn_clear = nullptr;
+	wxButton* m_btn_cls = nullptr;
 
 	wxButton* m_btn_negative = nullptr;
 	wxButton* m_btn_decimal = nullptr;
