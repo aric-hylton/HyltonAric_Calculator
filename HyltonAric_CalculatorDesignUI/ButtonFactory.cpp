@@ -1,5 +1,29 @@
 #include "ButtonFactory.h"
 
+std::vector<wxButton*> ButtonFactory::CreateNumButtons(wxWindow* callingWindow, std::vector<wxButton*> buttons) {
+	
+	wxSize buttonSize(100, 60);
+
+	// create 1-9
+	int xPos = 10,
+		yPos = 200;
+
+	for (int num = 1; num < 10; ++num) {
+		buttons[num] = new wxButton(callingWindow, num, std::to_string(num), \
+			wxPoint(xPos, yPos), buttonSize);
+		xPos += 110;
+		if (num % 3 == 0) {
+			yPos += 70;
+			xPos = 10;
+		}
+	}
+	buttons[0] = new wxButton(callingWindow, 0, "0", wxPoint(120, 410), buttonSize);
+
+	return buttons;
+}
+
+/* --------------------------------------------------------------------- */
+
 wxButton* ButtonFactory::CreateAddButton(wxWindow* callingWindow) {
 	wxButton* add = new wxButton(callingWindow, 1024, "+", wxPoint(340, 270), wxSize(100, 60));
 	return add;

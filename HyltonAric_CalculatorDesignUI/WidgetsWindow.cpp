@@ -70,24 +70,10 @@ WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(
 	SetFont(font);
 
 	wxGridSizer* buttonSizer = new wxGridSizer(4, 0, 0);
-
-	wxSize buttonSize(100, 60);
-
-	// create 1-9
-	int xPos = 10,
-		yPos = 200;
+	
 	m_numButtons.resize(10);
-	for (int num = 1; num < 10; ++num) {
-		m_numButtons[num] = new wxButton(this, num, std::to_string(num), \
-			wxPoint(xPos, yPos), buttonSize);
-		xPos += 110;
-		if (num % 3 == 0) {
-			yPos += 70;
-			xPos = 10;
-		}
-	}
-	// create 0
-	m_btn0 = new wxButton(this, 0, "0", wxPoint(120, 410), wxSize(100, 60));
+	// 0-9
+	factory.CreateNumButtons(this, m_numButtons);
 
 	// /, *, +, -, =
 	m_btn_add = factory.CreateAddButton(this);

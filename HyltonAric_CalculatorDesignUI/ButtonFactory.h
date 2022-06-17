@@ -18,6 +18,9 @@ public:
 	wxButton* CreateSignButton(wxWindow* callingWindow);
 	wxButton* CreateDecButton(wxWindow* callingWindow);
 
+	std::vector<wxButton*> CreateNumButtons(wxWindow* callingWindow, std::vector<wxButton*> buttons);
+
+
 
 public:
 
