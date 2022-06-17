@@ -21,12 +21,11 @@ public:
 	wxButton* m_btn_mod = nullptr;
 	wxButton* m_btn_hex = nullptr;
 	wxButton* m_btn_bin = nullptr;
-	wxButton* m_btn_clear = nullptr;
+	wxButton* m_btn_cls = nullptr;
 
 	wxButton* m_btn_negative = nullptr;
 	wxButton* m_btn_decimal = nullptr;
 
-	wxButton* m_btn0 = nullptr;
 	wxTextCtrl* m_TextCtrl = nullptr;
 	std::string m_preOpNum;
 	std::string m_postOpNum;
