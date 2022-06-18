@@ -30,8 +30,6 @@ public:
 	std::string m_preOpNum;
 	std::string m_postOpNum;
 
-	double m_total;
-	double m_cur;
 	int m_op;
 	bool opExists = false;
 	bool hex = false;

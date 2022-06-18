@@ -1,5 +1,6 @@
 #include "WidgetsWindow.h"
 #include "ButtonFactory.h"
+#include "CalculatorProcessor.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -57,21 +58,18 @@ EVT_BUTTON(ID_BINARY_BUTTON, OnBinClicked)
 EVT_BUTTON(ID_EQUAL_BUTTON, OnEqualClicked)
 wxEND_EVENT_TABLE()
 
-
-
-
+CalculatorProcessor* processor = CalculatorProcessor::GetInstance();
 
 WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(400, 200), wxSize(500, 550)) {
 
 	ButtonFactory factory;
 
+	// Sets font for the window
 	wxFont font(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false);
-	
 	SetFont(font);
-
-	wxGridSizer* buttonSizer = new wxGridSizer(4, 0, 0);
 	
 	m_numButtons.resize(10);
+
 	// 0-9
 	factory.CreateNumButtons(this, m_numButtons);
 
@@ -98,11 +96,21 @@ WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(
 
 WidgetsWindow::~WidgetsWindow() {
 
-}
+};
 
 void WidgetsWindow::OnNumClicked(wxCommandEvent& evt) {
-	
-	onNumButton(evt, evt.GetId());
+
+	int id = evt.GetId();
+	if (opExists) {
+		m_postOpNum += std::to_string(id);
+		processor->SetCurNumber(std::stod(m_postOpNum));
+	}
+	else {
+		m_preOpNum += std::to_string(id);
+		processor->SetBaseNumber(std::stod(m_preOpNum));
+	}
+	updateDisplay();
+
 	evt.Skip();
 };
 
@@ -124,7 +132,7 @@ void WidgetsWindow::OnSignClicked(wxCommandEvent&) {
 		}
 
 		if (m_preOpNum.length() != 1) {
-			m_total = std::stod(m_preOpNum);
+			processor->SetBaseNumber(std::stod(m_preOpNum));
 		}
 	}
 	updateDisplay();
@@ -142,10 +150,7 @@ void WidgetsWindow::OnDeciClicked(wxCommandEvent&) {
 
 void WidgetsWindow::OnBinClicked(wxCommandEvent&) {
 	if (!opExists) {
-		int y = round(m_total);
-		std::string binary = std::bitset<8>(m_total).to_string();
-		m_TextCtrl->SetValue(binary);
-
+		m_TextCtrl->SetValue(processor->GetBinary());
 		m_preOpNum.assign("");
 	}
 };
@@ -154,22 +159,7 @@ void WidgetsWindow::OnHexClicked(wxCommandEvent&) {
 
 	std::string hexString;
 	if (!opExists ) {
-		if (!hex) {
-			std::ostringstream ss;
-			ss << "0x" << std::hexfloat << m_total;
-			hexString = ss.str();
-			m_TextCtrl->SetValue(hexString);
-
-			hex = true;
-		}
-		else {
-			std::stringstream ss;
-			ss << std::hex << hexString;
-			ss >> m_total;
-			m_TextCtrl->SetValue(std::to_string(m_total));
-
-			hex = false;
-		}
+		m_TextCtrl->SetValue(processor->GetHexadecimal());
 		m_preOpNum.assign("");
 	}
 };
@@ -179,29 +169,7 @@ void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
 		opExists = true;
 		int OP = evt.GetId();
 		m_op = OP - OP_OFFSET;
-		switch (OP) {
-		case ID_ADD_BUTTON: {
-			m_preOpNum += "+";
-			break;
-		}
-		case ID_SUB_BUTTON: {
-			m_preOpNum += "-";
-			break;
-		}
-		case ID_MUL_BUTTON:
-		{
-			m_preOpNum += "*";
-			break;
-		}
-		case ID_DIV_BUTTON: {
-			m_preOpNum += "/";
-			break;
-		}
-		case ID_MOD_BUTTON: {
-			m_preOpNum += "%";
-			break;
-		}
-		}
+		m_preOpNum += processor->OnOperationClicked(m_op);
 		updateDisplay();
 	}
 	
@@ -211,13 +179,13 @@ void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
 void WidgetsWindow::OnEqualClicked(wxCommandEvent& evt) {
 	double result = 0;
 	if (m_op >= 0) {
-		result = performOperation(m_total, m_cur, m_op);
+		result = processor->performOperation(m_op);
 	}
 	m_TextCtrl->SetValue(std::to_string(result));
 
 	m_postOpNum.assign("");
 	m_preOpNum.assign(m_TextCtrl->GetValue());
-	m_total = result;
+	processor->SetBaseNumber(result);
 
 	opExists = false;
 };
@@ -231,61 +199,14 @@ void WidgetsWindow::updateDisplay()
 	m_TextCtrl->SetValue(numStr);
 }
 
-void WidgetsWindow::onNumButton(wxCommandEvent&, int NUM)
-{
-	if (opExists) {
-		m_postOpNum += std::to_string(NUM);
-		m_cur = std::stod(m_postOpNum);
-	}
-	else {
-		m_preOpNum += std::to_string(NUM);
-		m_total = std::stod(m_preOpNum);
-	}
-	updateDisplay();
-}
-
 
 void WidgetsWindow::Clear(wxCommandEvent&)
 {
 	opExists = false;
-	m_total = 0;
-	m_cur = 0;
+	processor->SetBaseNumber(0);
+	processor->SetCurNumber(0);
 	m_preOpNum.assign("");
 	m_postOpNum.assign("");
 	m_TextCtrl->SetValue("");
 }
 
-double WidgetsWindow::performOperation(double const left, double const right, int const op)
-{
-	double result;
-
-	switch (op) {
-	case OP_ADD: {
-		result = left + right;
-		break;
-	}
-	case OP_SUB: {
-		result = left - right;
-		break;
-	}
-	case OP_MUL: {
-		result = left * right;
-		break;
-	}
-	case OP_DIV: {
-		if (right != 0) {
-			result = left / right;
-		}
-		else {
-			result = 0;
-		}
-		break;
-	}
-	case OP_MOD: {
-		result = (int)left % (int)right;
-		break;
-	}
-	}
-
-	return result;
-}
