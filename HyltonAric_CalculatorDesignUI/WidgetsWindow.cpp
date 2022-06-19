@@ -156,7 +156,6 @@ void WidgetsWindow::OnBinClicked(wxCommandEvent&) {
 };
 
 void WidgetsWindow::OnHexClicked(wxCommandEvent&) {
-
 	std::string hexString;
 	if (!opExists ) {
 		m_TextCtrl->SetValue(processor->GetHexadecimal());
