@@ -87,7 +87,6 @@ public:
 	double performOperation(int const op)
 	{
 		std::vector<IBaseCommand*> commands;
-		double result;
 
 		double base = baseNumber;
 		double cur = curNumber;
@@ -119,7 +118,6 @@ public:
 				break;
 			}
 		}
-
 
 		return commands[0]->Execute();
 	}

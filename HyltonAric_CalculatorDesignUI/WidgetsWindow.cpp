@@ -107,8 +107,10 @@ void WidgetsWindow::OnNumClicked(wxCommandEvent& evt) {
 		processor->SetCurNumber(std::stod(m_postOpNum));
 	}
 	else {
-		m_preOpNum += std::to_string(id);
-		processor->SetBaseNumber(std::stod(m_preOpNum));
+		if (!equalsClicked) {
+			m_preOpNum += std::to_string(id);
+			processor->SetBaseNumber(std::stod(m_preOpNum));
+		}
 	}
 	updateDisplay();
 
@@ -179,6 +181,7 @@ void WidgetsWindow::OnOperationClicked(wxCommandEvent& evt) {
 
 void WidgetsWindow::OnEqualClicked(wxCommandEvent& evt) {
 	double result = 0;
+	equalsClicked = true;
 	if (m_op >= 0) {
 		result = processor->performOperation(m_op);
 	}
@@ -204,6 +207,7 @@ void WidgetsWindow::updateDisplay()
 void WidgetsWindow::Clear(wxCommandEvent&)
 {
 	opExists = false;
+	equalsClicked = false;
 	processor->SetBaseNumber(0);
 	processor->SetCurNumber(0);
 	m_preOpNum.assign("");
