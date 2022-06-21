@@ -1,5 +1,12 @@
 #pragma once
 #include <string>
+#include "IBaseCommand.h"
+#include <vector>
+#include "AddCommand.h"
+#include "SubtractCommand.h"
+#include "DivideCommand.h"
+#include "MultiplyCommand.h"
+#include "ModCommand.h"
 
 class CalculatorProcessor
 {
@@ -9,6 +16,7 @@ private:
 	int baseNumber;
 	int curNumber;
 public:
+	
 	static CalculatorProcessor* GetInstance() {
 		if (_processor == nullptr) {
 			_processor = new CalculatorProcessor();
@@ -78,6 +86,7 @@ public:
 
 	double performOperation(int const op)
 	{
+		std::vector<IBaseCommand*> commands;
 		double result;
 
 		double base = baseNumber;
@@ -85,33 +94,34 @@ public:
 
 		switch (op) {
 			case 0: {
-				result = base + cur;
+				AddCommand ac(base, cur);
+				commands.push_back(&ac);
 				break;
 			}
 			case 1: {
-				result = base - cur;
+				SubtractCommand sc(base, cur);
+				commands.push_back(&sc);
 				break;
 			}
 			case 2: {
-				result = base * cur;
+				MultiplyCommand mc(base, cur);
+				commands.push_back(&mc);
 				break;
 			}
 			case 3: {
-				if (cur != 0) {
-					result = base / cur;
-				}
-				else {
-					result = 0;
-				}
+				DivideCommand dc(base, cur);
+				commands.push_back(&dc);
 				break;
 			}
 			case 4: {
-				result = (int)base % (int)cur;
+				ModCommand modc(base, cur);
+				commands.push_back(&modc);
 				break;
 			}
 		}
 
-		return result;
+
+		return commands[0]->Execute();
 	}
 
 	std::string OnOperationClicked(int m_op) {

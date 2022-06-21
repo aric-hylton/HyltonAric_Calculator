@@ -60,6 +60,7 @@ wxEND_EVENT_TABLE()
 
 CalculatorProcessor* processor = CalculatorProcessor::GetInstance();
 
+
 WidgetsWindow::WidgetsWindow() : wxFrame(nullptr, wxID_ANY, "Widgets!", wxPoint(400, 200), wxSize(500, 550)) {
 
 	ButtonFactory factory;
