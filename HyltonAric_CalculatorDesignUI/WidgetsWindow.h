@@ -32,7 +32,7 @@ public:
 
 	int m_op;
 	bool opExists = false;
-	bool hex = false;
+	bool equalsClicked = false;
 
 	void updateDisplay();
 	void onNumButton(wxCommandEvent&, int NUM);
@@ -53,11 +53,6 @@ public:
 		OP_DIV,
 		OP_MOD
 	};
-
-	static double performOperation(
-		double left,
-		double right,
-		int op);
  
 	wxDECLARE_EVENT_TABLE();
 };
